@@ -217,31 +217,32 @@ function isHttps() {
 
 // Works in both index.html and exploit.html
 function log(message, color, consoleEl) {
-    var consoleEl = consoleEl ? consoleEl : ui.consoleElement;
-    var consoleEl = (typeof ui !== 'undefined' && ui.consoleElement)
-        ? ui.consoleElement
-        : document.getElementById('console');
+    // Resolve the target console element without shadowing the parameter.
+    var target = consoleEl
+        ? consoleEl
+        : (typeof ui !== 'undefined' && ui.consoleElement)
+            ? ui.consoleElement
+            : document.getElementById('console');
 
-    if (typeof user !== 'undefined' && user.clearLog && consoleEl) {
-        consoleEl.textContent = '';
+    if (typeof user !== 'undefined' && user.clearLog && target) {
+        target.textContent = '';
         user.clearLog = false;
     }
-    if (!consoleEl) return;
+    if (!target) return;
 
-        var span = document.createElement('span');
-        // break text into a new line to keep it visible
-        span.style.whiteSpace = "pre-wrap";
-        span.style.fontSize = "14px";
-        span.textContent = message + '\n';
-        if (color) span.style.color = color;
-        consoleEl.appendChild(span);
+    var span = document.createElement('span');
+    span.style.whiteSpace = "pre-wrap";
+    span.style.fontSize = "14px";
+    span.textContent = message + '\n';
+    if (color) span.style.color = color;
+    target.appendChild(span);
 
-        // Show copy log button when there's actual content (not just initial "--")
-        var copyBtn = document.getElementById('copyLogBtn');
-        if (copyBtn && consoleEl.textContent.trim() !== '--') {
-            copyBtn.classList.remove('hidden');
-        }
+    // Show copy log button when there's actual content (not just initial "--")
+    var copyBtn = document.getElementById('copyLogBtn');
+    if (copyBtn && target.textContent.trim() !== '--') {
+        copyBtn.classList.remove('hidden');
     }
+}
 
 function getReloadAfterJbValue() {
     return storage.getBoolean('reloadAfterJb', true);
@@ -560,17 +561,5 @@ function sendToElfldr(payload_path, log, retryForMs) {
         }
 
         attempt();
-    });
-}
-
-function sendNexHENAfterElfLoader(payload_path, log) {
-    if (!/(?:^|\/)nexHEN-ps4\.bin(?:[?#]|$)/i.test(payload_path || "")) {
-        return Promise.resolve(null);
-    }
-
-    return new Promise(function (resolve) {
-        setTimeout(resolve, 3000);
-    }).then(function () {
-        return sendToElfldr("./includes/payloads/HEN/nexHEN-ps4.elf", log, 5000);
     });
 }

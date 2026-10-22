@@ -18,33 +18,16 @@ async function jailbreak() {
   storage.session.set('autoJbRetry', true);
 
   // Skip if payload was chosen, useful when a payload was chosen from deliverPayload.js
-  var payloadPath = storage.session.getString('`payload_path`', null);
+  var payloadPath = storage.session.getString('payload_path', null);
   if (!payloadPath || payloadPath == null) {
     // Choose HEN
     chooseHEN();
   }
 
   cleanUp();
-  
+
   payloadPath = storage.session.getString('payload_path', null);
   log("Loading: " + payloadPath);
-
-  // Check if .elf is selected or nexHEN
-  if (payloadPath && (payloadPath.indexOf('.elf') !== -1 || payloadPath.indexOf("nexHEN-ps4") !== -1)) {
-    if (payloadPath.indexOf("nexHEN-ps4") !== -1) {
-      // elfldr expects .elf payloads
-      payloadPath = payloadPath.replace('.bin', '.elf');
-    }
-    
-    try {
-      let success = await sendToElfldr(payloadPath, log);
-      if (success) {
-        return; // Stop on success
-      }
-    } catch (error) {}
-
-    await sleep(500);
-  }
 
   // barebone exploit preferred? go to exploit file
   if (user.bareboneJB) {
@@ -121,38 +104,38 @@ async function badHoistJailbreak() {
   log("Starting Kernel Exploit...");
   await sleep(200); // Wait 200ms
 
-  await loadScript('./src/badhoist/672kexploit.js', false, devMode);
+  await loadScript('src/badhoist/672kexploit.js', false, devMode);
   var result = KernelExploit672();
   var payloadPath = storage.session.getString('payload_path', '');
 
   if (result === 0 || result === 91) {
-      log("\nKernel exploit succeeded", "green");
-      // Inject HEN payload
-      log("Injecting payload: " + payloadPath);
-      getPayload672(payloadPath);
+    log("\nKernel exploit succeeded", "green");
+    // Inject HEN payload
+    log("Injecting payload: " + payloadPath);
+    getPayload672(payloadPath);
 
-      log("\nBad Hoist by Fire30, 6.7x Kernel Exploit by Sleirsgoevy");
-      log("Implementation taken from Feyzee61");
-      jailbreakSuccess();
-    } else if (result === 179) {
-      log("\nAlready jailbroken, skipping..", "green");
-      log("Injecting payload: " + payloadPath);
-      getPayload672(payloadPath);
-      log("Payload injected successfully", "green");
-      log("\nBad Hoist by Fire30, 6.7x Kernel Exploit by Sleirsgoevy");
-      log("Implementation taken from Feyzee61");
-      jailbreakSuccess();
-    } else {
-      log("\nAn error occured during Kernel Exploit\nPlease restart console and try again...", "red");
-      storage.session.remove('jailbreakNow');
-      jailbreakFailure();
-    }
+    log("\nBad Hoist by Fire30, 6.7x Kernel Exploit by Sleirsgoevy");
+    log("Implementation taken from Feyzee61");
+    jailbreakSuccess();
+  } else if (result === 179) {
+    log("\nAlready jailbroken, skipping..", "green");
+    log("Injecting payload: " + payloadPath);
+    getPayload672(payloadPath);
+    log("Payload injected successfully", "green");
+    log("\nBad Hoist by Fire30, 6.7x Kernel Exploit by Sleirsgoevy");
+    log("Implementation taken from Feyzee61");
+    jailbreakSuccess();
+  } else {
+    log("\nAn error occured during Kernel Exploit\nPlease restart console and try again...", "red");
+    storage.session.remove('jailbreakNow');
+    jailbreakFailure();
   }
+}
 
 async function cssFontFaceJailbreak() {
   log("Loading ufm42's CSSFontFace exploit chain implementation..");
   try {
-    await getScript('./src/cssfontface/main.js', false, devMode);
+    await getScript('src/cssfontface/main.js', false, devMode);
     doCssFontFaceJailbreak();
   } catch (e) {
     log("Failed to load CSSFontFace exploit: " + e.message, "red");
@@ -164,9 +147,9 @@ async function slopKit() {
   log("Loading Raw-Game's SlopKit exploit chain implementation..");
   try {
     if (user.exploitChain === EXPLOIT_CHAINS.SLOPKIT_NETCTRL) {
-      await getScript("./src/slopkit/chain_poops.js", true, devMode);
+      await getScript("src/slopkit/chain_poops.js", true, devMode);
     } else {
-      await getScript("./src/slopkit/chain_lapse.js", true, devMode);
+      await getScript("src/slopkit/chain_lapse.js", true, devMode);
     }
   } catch (error) {
     log("Failed to load SlopKit exploit: " + error.message, "red");
@@ -177,7 +160,7 @@ async function slopKit() {
 async function relapseJailbreak() {
   log("Loading Raw Game's Relapse exploit chain implementation..");
   try {
-    await getScript("./src/relapse/jb.js?v=10", true, devMode);
+    await getScript("src/relapse/jb.js?v=10", true, devMode);
   } catch (error) {
     log("Failed to load Relapse exploit: " + error.message, "red");
     jailbreakFailure();
@@ -187,7 +170,7 @@ async function relapseJailbreak() {
 async function bpfDoubleFree() {
   log("Loading bpf double free exploit chain implementation..");
   try {
-    await getScript("./src/bpf-double-free/main.js", false, devMode);
+    await getScript("src/bpf-double-free/main.js", false, devMode);
     loadBpfDoubleFree();
   } catch (error) {
     log("Failed to load BPF Double Free exploit: " + error.message, "red");
